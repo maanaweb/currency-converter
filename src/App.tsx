@@ -1,4 +1,11 @@
+import {useEffect} from 'react'
+
+import {fetchCurrencies} from './api/rates';
+
 function App() {
+  useEffect(() => {
+    fetchCurrencies().then(res => console.log(res))
+  }, [])
   return (
     <>
         <div>
