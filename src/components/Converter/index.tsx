@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { CurrencySelect } from "../CurrencySelect";
 
 import { fetchLatest } from "../../api/rates";
@@ -13,6 +13,7 @@ export const Converter = () => {
     queryKey: ["converter", baseCurrency, targetCurrency],
     queryFn: () => fetchLatest(baseCurrency, targetCurrency),
     staleTime: 60 * 60 * 1000,
+    placeholderData: keepPreviousData,
   });
 
   if (query.isPending) {
@@ -23,10 +24,12 @@ export const Converter = () => {
     return <span>{"Something went wrong..."}</span>;
   }
 
+  const [shownCurrency, rate] = Object.entries(query.data.rates)[0];
+
   const targetAmount = new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: targetCurrency,
-  }).format(amount * query.data.rates[targetCurrency]);
+    currency: shownCurrency,
+  }).format(amount * rate);
 
   return (
     <>
@@ -48,7 +51,7 @@ export const Converter = () => {
       >
         Swap
       </button>
-      <span>{targetAmount} </span>
+      <span style={{opacity: query.isPlaceholderData ? 0.5 : 1}}>{targetAmount} </span>
       <CurrencySelect
         value={targetCurrency}
         onChange={(code) => setTargetCurrency(code)}
