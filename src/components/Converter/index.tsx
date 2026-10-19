@@ -20,11 +20,10 @@ export const Converter = () => {
     return <span>{"Loading..."}</span>;
   }
 
-  if (query.isError) {
-    return <span>{"Something went wrong..."}</span>;
-  }
-
-  const [shownCurrency, rate] = Object.entries(query.data.rates)[0];
+  const [shownCurrency, rate] = Object.entries(query.data?.rates ?? {})[0] ?? [
+    targetCurrency,
+    0,
+  ];
 
   const targetAmount = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -51,7 +50,16 @@ export const Converter = () => {
       >
         Swap
       </button>
-      <span style={{opacity: query.isPlaceholderData ? 0.5 : 1}}>{targetAmount} </span>
+      {query.isError ? (
+        <>
+          <span style={{ color: "red" }}>{query.error.message}</span>
+          <button onClick={() => query.refetch()}>Retry</button>
+        </>
+      ) : (
+        <span style={{ opacity: query.isPlaceholderData ? 0.5 : 1 }}>
+          {targetAmount}
+        </span>
+      )}
       <CurrencySelect
         value={targetCurrency}
         onChange={(code) => setTargetCurrency(code)}
